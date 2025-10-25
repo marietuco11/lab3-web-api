@@ -2,109 +2,177 @@
 
 # Web Engineering 2025-2026 / Lab 3: Complete a Web API
 
-A minimal Spring Boot + Kotlin starter for Lab 3. Complete the tasks in `docs/GUIDE.md` by filling in the SETUP/VERIFY blocks in the tests to demonstrate HTTP method safety and idempotency.
+A minimal Spring Boot + Kotlin REST API demonstrating HTTP method semantics (safety and idempotency) through comprehensive testing. This project implements a complete test suite for a basic Employee management API.
 
-## Tech stack
-- Spring Boot 3.5.3
-- Kotlin 2.2.10
-- Java 21 (toolchain)
-- Gradle Wrapper
+## Tech Stack
+- **Spring Boot** 3.5.3
+- **Kotlin** 2.2.10
+- **Java** 21 (toolchain)
+- **Gradle** 9.0.0
+- **MockK** for mocking
+- **Spring MockMvc** for testing
 
 ## Prerequisites
-- Java 21
+- Java 21 or higher
 - Git
 
-## Quick start
+## Quick Start
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd lab-3-restful-ws
+
+# Build the project
 ./gradlew clean build
+
+# Run tests
 ./gradlew test
+
+# Run the application
 ./gradlew bootRun
 # Default: http://localhost:8080
 ```
 
-## Project structure
-- `src/main/kotlin/es/unizar/webeng/lab3`: application code (`Application.kt`, `Controller.kt`, `Employee.kt`, `EmployeeRepository.kt`)
-- `src/test/kotlin/es/unizar/webeng/lab3`: tests (`ControllerTests.kt`)
-- `docs/GUIDE.md`: assignment instructions
+## Project Structure
+```
+src/
+├── main/kotlin/es/unizar/webeng/lab3/
+│   ├── Application.kt          # Spring Boot application entry point
+│   ├── Controller.kt           # REST controller with CRUD endpoints
+│   ├── Employee.kt             # Employee entity
+│   └── EmployeeRepository.kt   # JPA repository
+└── test/kotlin/es/unizar/webeng/lab3/
+    └── ControllerTests.kt      # Complete test suite
 
-## Assignment tasks
-See `docs/GUIDE.md` for detailed steps:
-- Complete the SETUP/VERIFY blocks for `POST`, `GET`, `PUT`, and `DELETE` in `ControllerTests`
-- Run the test suite and ensure all tests pass
-
-## Code quality and formatting
-```bash
-./gradlew ktlintFormat ktlintCheck
 ```
 
+## API Endpoints
+
+The application exposes the following REST endpoints:
+
+- `POST /employees` - Create a new employee (Not safe, Not idempotent)
+- `GET /employees/{id}` - Retrieve an employee (Safe, Idempotent)
+- `PUT /employees/{id}` - Create or update an employee (Not safe, Idempotent)
+- `DELETE /employees/{id}` - Delete an employee (Not safe, Idempotent)
+
+## Assignment Completion
+
+This project successfully implements all required tests demonstrating:
+
+### HTTP Method Properties
+
+1. **POST Test** - Demonstrates that POST is neither safe nor idempotent:
+   - Each request creates a new resource with a different ID
+   - Verifies that `save()` is called multiple times with different results
+
+2. **GET Test** - Demonstrates that GET is both safe and idempotent:
+   - Multiple identical requests return the same result
+   - No repository modification methods are called
+   - Properly handles 404 for non-existent resources
+
+3. **PUT Test** - Demonstrates that PUT is idempotent but not safe:
+   - First request creates the resource (201 Created)
+   - Subsequent identical requests update with the same result (200 OK)
+   - Verifies `findById()` is called to check existence
+
+4. **DELETE Test** - Demonstrates that DELETE is idempotent but not safe:
+   - Multiple delete requests have the same effect
+   - Verifies `deleteById()` is called correctly
+   - No other repository methods are invoked
+
 ## Testing
+
+### Run All Tests
 ```bash
 ./gradlew test
 ```
 
-## Bonus opportunities
-Be the first to complete **at least two** of the following tasks to earn a bonus:
+### Run with Coverage
+```bash
+./gradlew test jacocoTestReport
+```
 
-### 1. **Implement Comprehensive Security with Authentication and Authorization**
-- **Description**: Add robust security mechanisms including JWT-based authentication, role-based authorization, and protection for different HTTP methods based on user permissions.
-- **Implementation**: Implement JWT token generation/validation, create user roles (ADMIN, USER), secure endpoints that modify data (POST, PUT, DELETE) with proper authorization, and add security tests that verify unauthorized access is properly rejected.
-- **Goal**: Demonstrate understanding of API security principles and protect sensitive operations.
-- **Benefit**: Shows mastery of modern authentication/authorization patterns and API security best practices.
+### Test Output
+All tests validate:
+- Correct HTTP status codes
+- Proper response headers (Location, Content-Location)
+- Expected JSON response bodies
+- Repository method invocation counts
+- Safety and idempotency properties
 
-### 2. **Implement RESTful API Documentation with OpenAPI/Swagger**
-- **Description**: Add comprehensive API documentation using SpringDoc OpenAPI, including detailed descriptions of HTTP method semantics, request/response examples, and error scenarios.
-- **Implementation**: Document all endpoints with proper HTTP status codes, include examples for safe vs unsafe operations, and add interactive Swagger UI.
-- **Goal**: Create professional API documentation that explains the RESTful design principles.
-- **Benefit**: Enhances API usability and demonstrates understanding of API design best practices.
+## Code Quality and Formatting
 
-### 3. **Add Advanced Error Handling with RFC 7807 Problem Details**
-- **Description**: Implement sophisticated error handling using RFC 7807 Problem Details for HTTP APIs, with proper error types for different scenarios.
-- **Implementation**: Create custom exception handlers, map different error scenarios to appropriate problem types, and include correlation IDs for debugging.
-- **Goal**: Provide consistent, informative error responses that help API consumers understand and handle errors.
-- **Benefit**: Shows understanding of modern API error handling standards and improves developer experience.
+This project uses **Ktlint** for code formatting:
+```bash
+# Format code
+./gradlew ktlintFormat
 
-### 4. **Implement API Versioning and Content Negotiation**
-- **Description**: Add API versioning support and content negotiation for different response formats (JSON, XML, etc.).
-- **Implementation**: Support multiple API versions, handle different Accept headers, and provide appropriate responses based on client preferences.
-- **Goal**: Demonstrate flexibility in API design and support for diverse client needs.
-- **Benefit**: Shows understanding of API evolution and client compatibility strategies.
+# Check formatting
+./gradlew ktlintCheck
+```
 
-### 5. **Add Comprehensive Logging and Monitoring**
-- **Description**: Implement structured logging with correlation IDs, request tracing, and performance metrics for API operations.
-- **Implementation**: Add request/response logging, track method execution times, and include correlation IDs for request tracing.
-- **Goal**: Enable effective debugging and monitoring of API behavior.
-- **Benefit**: Demonstrates understanding of production-ready API observability.
+**Important**: If Ktlint modifies your code during formatting, the build will fail. Always run `ktlintFormat` before building.
 
-### 6. **Implement Rate Limiting and API Protection**
-- **Description**: Add sophisticated rate limiting, API key validation, and DDoS protection mechanisms to safeguard API endpoints from abuse.
-- **Implementation**: Implement sliding window rate limiting, API key-based access control, request throttling, and protection against common attacks (brute force, spam).
-- **Goal**: Protect the API from abuse, overuse, and malicious attacks.
-- **Benefit**: Shows understanding of API protection strategies and production security concerns.
+## Implementation Details
 
-### 7. **Add Integration Tests with Real Database**
-- **Description**: Create comprehensive integration tests that use a real database (H2 or PostgreSQL) to test the complete data flow.
-- **Implementation**: Test database transactions, verify data persistence, and test concurrent access scenarios.
-- **Goal**: Ensure the API works correctly with real data persistence.
-- **Benefit**: Demonstrates understanding of integration testing and database interactions.
+### Mocking Strategy
+Tests use MockK to simulate repository behavior:
+- `every { }` blocks for method stubbing
+- `andThenAnswer { }` for sequential responses
+- `justRun { }` for void methods
+- `verify(exactly = N)` for invocation counting
 
-### 8. **Implement Caching and Performance Optimization**
-- **Description**: Add HTTP caching headers, implement response caching for safe operations, and optimize API performance.
-- **Implementation**: Add appropriate cache headers for GET requests, implement response caching, and optimize database queries.
-- **Goal**: Improve API performance and reduce server load.
-- **Benefit**: Shows understanding of web performance optimization and caching strategies.
+### Test Scenarios Covered
+- Resource creation with unique IDs
+- Successful resource retrieval
+- 404 responses for non-existent resources
+- Resource creation vs. update (PUT)
+- Idempotent deletion
+- Method safety verification
 
-### 9. **Add API Testing with Contract Testing**
-- **Description**: Implement contract testing using tools like Pact or Spring Cloud Contract to ensure API compatibility.
-- **Implementation**: Define API contracts, test consumer-provider compatibility, and ensure backward compatibility.
-- **Goal**: Ensure API contracts are maintained and consumers are not broken by changes.
-- **Benefit**: Demonstrates understanding of API contract management and consumer protection.
+## Key Concepts Demonstrated
 
-### 10. **Replace with Spring WebFlux Reactive Implementation**
-- **Description**: Replace the current blocking implementation with [Spring WebFlux](https://docs.spring.io/spring-framework/reference/web-reactive.html) for reactive, non-blocking API operations.
-- **Implementation**: Convert controllers to use reactive types (Mono/Flux), implement reactive repositories, and maintain the same API contract while gaining reactive benefits.
-- **Goal**: Demonstrate understanding of reactive programming and non-blocking I/O.
-- **Benefit**: Shows mastery of modern reactive web development and performance optimization.
+### Safe Methods
+Methods that don't alter server state:
+- **GET** - Only reads data, no side effects
 
-Feel free to choose any of these bonus tasks to enrich your assignment. Completing them will not only earn you a bonus but also deepen your understanding of best practices in web development. 
+### Idempotent Methods
+Methods where multiple identical requests have the same effect:
+- **GET** - Always returns the same data
+- **PUT** - Creates once, then updates to same state
+- **DELETE** - Deletes once, subsequent calls have no additional effect
 
-If you need guidance on how to approach any of these tasks or have questions, don't hesitate to ask!
+### Non-Idempotent Methods
+Methods where each request may produce different results:
+- **POST** - Each call creates a new resource with a new ID
+
+## Lessons Learned
+
+1. **REST Semantics**: Deep understanding of HTTP method properties and their practical implications
+2. **Test-Driven Design**: How tests document and enforce expected API behavior
+3. **Mocking Frameworks**: Effective use of MockK for isolating units under test
+4. **Spring Testing**: Integration between Spring's test framework and MockK
+
+## CI/CD
+
+The project includes GitHub Actions workflow that:
+- Builds the project
+- Runs all tests
+- Validates code formatting
+- Generates test reports
+
+Check the build status badge at the top of this README.
+
+## Documentation
+
+For detailed assignment instructions and code block explanations, see:
+- `docs/GUIDE.md` - Complete assignment guide
+- `REPORT.md` - Project completion report
+
+## Author
+
+Completed as part of Web Engineering 2025-2026 course assignment.
+
+## License
+
+Educational project - see course materials for details.
